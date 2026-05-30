@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-^&!j3h0)63mu5&vv@##pcplc_3qj^cqs$$b52e1mbsqn(3yc)h'
+SECRET_KEY = 'django-insecure-c_!$289%rd&ju1^(&9vop^j4g8uhcd#!m1bd)=gwe63cz%iqz!'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -38,8 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'iTrendAI',
-    'agents',
-    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -117,14 +115,4 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
-import os
-from dotenv import load_dotenv
-
-load_dotenv(BASE_DIR / '.env')
-
-OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
+STATIC_URL = '/static/'

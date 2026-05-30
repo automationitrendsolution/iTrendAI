@@ -1,0 +1,483 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Product Research — iTrendAI</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #ffffff;
+      min-height: 100vh;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      color: #1a1a2e;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% -10%, rgba(99,102,241,.07) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 90% 110%, rgba(139,92,246,.06) 0%, transparent 60%);
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ── Navbar ── */
+    .glass-nav {
+      position: fixed; top: 18px; left: 50%; transform: translateX(-50%);
+      width: calc(100% - 48px); max-width: 1100px; z-index: 1000;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .7rem 1.4rem;
+      background: rgba(255,255,255,.65);
+      backdrop-filter: blur(18px) saturate(180%);
+      -webkit-backdrop-filter: blur(18px) saturate(180%);
+      border: 1px solid rgba(255,255,255,.75); border-radius: 1rem;
+      box-shadow: 0 4px 24px rgba(99,102,241,.10), 0 1.5px 4px rgba(0,0,0,.06), inset 0 1px 0 rgba(255,255,255,.8);
+    }
+    .nav-brand { display: inline-flex; align-items: center; text-decoration: none; line-height: 0; }
+    .nav-brand img { height: 38px; width: auto; object-fit: contain; }
+    .nav-title { font-size: .85rem; font-weight: 600; color: #6b7280; display: flex; align-items: center; gap: .4rem; }
+    .nav-title i { color: #6366f1; }
+    .btn-gradient {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      color: #fff; border: none; border-radius: .6rem; padding: .45rem 1.1rem;
+      font-size: .85rem; font-weight: 600; cursor: pointer;
+      transition: opacity .2s, box-shadow .2s, transform .15s;
+      box-shadow: 0 2px 12px rgba(99,102,241,.35);
+      text-decoration: none; display: inline-flex; align-items: center; gap: .35rem;
+    }
+    .btn-gradient:hover { opacity: .9; color: #fff; box-shadow: 0 4px 18px rgba(99,102,241,.45); transform: translateY(-1px); }
+
+    /* ── Page ── */
+    .page-wrapper { position: relative; z-index: 1; padding-top: 108px; padding-bottom: 60px; }
+
+    /* ── Breadcrumb ── */
+    .breadcrumb-row {
+      display: flex; align-items: center; gap: .5rem;
+      font-size: .8rem; color: #9ca3af; margin-bottom: 1.6rem;
+    }
+    .breadcrumb-row a { color: #6366f1; text-decoration: none; font-weight: 500; }
+    .breadcrumb-row a:hover { text-decoration: underline; }
+
+    /* ── Form card ── */
+    .form-card {
+      background: #fff; border-radius: 1.25rem;
+      border: 1px solid rgba(0,0,0,.07);
+      box-shadow: 0 4px 32px rgba(0,0,0,.07), 0 1px 4px rgba(0,0,0,.04);
+      overflow: hidden; margin-bottom: 2.5rem;
+    }
+    .card-top-bar {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      padding: 1.4rem 1.8rem;
+    }
+    .card-top-bar h5 { font-size: 1.05rem; font-weight: 700; color: #fff; margin: 0 0 .25rem; }
+    .card-top-bar p  { font-size: .83rem; color: rgba(255,255,255,.7); margin: 0; }
+    .card-body-inner { padding: 1.8rem; }
+
+    /* ── Fields ── */
+    .field-label { font-size: .82rem; font-weight: 600; color: #374151; margin-bottom: .4rem; display: flex; align-items: center; gap: .35rem; }
+    .field-label i { color: #6366f1; font-size: .85rem; }
+    .field-input {
+      width: 100%; padding: .6rem .95rem;
+      border: 1.5px solid #e5e7eb; border-radius: .65rem;
+      font-size: .9rem; color: #1a1a2e; background: #fafafa;
+      transition: border-color .2s, box-shadow .2s, background .2s; outline: none;
+    }
+    .field-input:focus { border-color: #6366f1; background: #fff; box-shadow: 0 0 0 3px rgba(99,102,241,.12); }
+    .field-input::placeholder { color: #9ca3af; }
+    .field-input.is-invalid { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,.1); }
+    .field-error { font-size: .76rem; color: #ef4444; margin-top: .3rem; display: none; }
+    .field-error.show { display: block; }
+
+    /* ── Upload zone ── */
+    .upload-zone {
+      border: 2px dashed #d1d5db; border-radius: .85rem; background: #fafafa;
+      padding: 2rem 1.5rem; text-align: center; cursor: pointer; position: relative;
+      transition: border-color .2s, background .2s, box-shadow .2s;
+    }
+    .upload-zone:hover, .upload-zone.dragover { border-color: #6366f1; background: rgba(99,102,241,.04); box-shadow: 0 0 0 3px rgba(99,102,241,.08); }
+    .upload-zone.has-file { border-color: #10b981; background: rgba(16,185,129,.04); }
+    .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+    .upload-icon {
+      width: 48px; height: 48px; border-radius: .8rem;
+      background: linear-gradient(135deg, rgba(99,102,241,.12), rgba(139,92,246,.12));
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; color: #6366f1; margin-bottom: .75rem;
+    }
+    .upload-zone.has-file .upload-icon { background: rgba(16,185,129,.12); color: #10b981; }
+    .upload-main-text { font-weight: 600; font-size: .88rem; color: #374151; margin-bottom: .2rem; }
+    .upload-sub-text  { font-size: .76rem; color: #9ca3af; }
+    .upload-filename  { font-size: .84rem; font-weight: 600; color: #10b981; margin-top: .35rem; }
+
+    /* ── Tip ── */
+    .tip-box {
+      background: linear-gradient(135deg, rgba(99,102,241,.06), rgba(139,92,246,.06));
+      border: 1px solid rgba(99,102,241,.15); border-radius: .75rem;
+      padding: .9rem 1.1rem; display: flex; gap: .7rem; align-items: flex-start;
+    }
+    .tip-box i { color: #6366f1; font-size: .95rem; flex-shrink: 0; margin-top: .1rem; }
+    .tip-box p { font-size: .81rem; color: #4b5563; margin: 0; line-height: 1.6; }
+
+    /* ── Buttons ── */
+    .btn-reset {
+      background: transparent; border: 1.5px solid #e5e7eb; border-radius: .65rem;
+      padding: .55rem 1.3rem; font-size: .87rem; font-weight: 600; color: #6b7280;
+      cursor: pointer; transition: all .2s; display: inline-flex; align-items: center; gap: .4rem;
+    }
+    .btn-reset:hover { border-color: #d1d5db; background: #f9fafb; color: #374151; }
+    .btn-submit {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      border: none; border-radius: .65rem; padding: .6rem 1.8rem;
+      font-size: .9rem; font-weight: 700; color: #fff; cursor: pointer;
+      transition: opacity .2s, box-shadow .2s, transform .15s;
+      box-shadow: 0 3px 14px rgba(99,102,241,.4);
+      display: inline-flex; align-items: center; gap: .45rem;
+    }
+    .btn-submit:hover  { opacity: .92; box-shadow: 0 5px 20px rgba(99,102,241,.5); transform: translateY(-1px); }
+    .btn-submit:active { transform: translateY(0); }
+
+    /* ── History section ── */
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .section-title {
+      font-size: 1rem; font-weight: 800; color: #0f0f23;
+      display: flex; align-items: center; gap: .5rem;
+    }
+    .section-title i { color: #6366f1; }
+    .history-count {
+      background: rgba(99,102,241,.1); color: #6366f1;
+      border-radius: 2rem; padding: .2rem .65rem;
+      font-size: .75rem; font-weight: 700;
+    }
+
+    /* ── History table card ── */
+    .history-card {
+      background: #fff; border-radius: 1.1rem;
+      border: 1px solid rgba(0,0,0,.07);
+      box-shadow: 0 2px 16px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.04);
+      overflow: hidden;
+    }
+
+    .history-table { width: 100%; border-collapse: collapse; }
+    .history-table thead tr {
+      background: #f9fafb; border-bottom: 1px solid #e5e7eb;
+    }
+    .history-table th {
+      padding: .75rem 1.1rem; font-size: .74rem; font-weight: 700;
+      color: #6b7280; text-transform: uppercase; letter-spacing: .5px;
+      text-align: left; white-space: nowrap;
+    }
+    .history-table tbody tr {
+      border-bottom: 1px solid #f3f4f6;
+      transition: background .15s;
+    }
+    .history-table tbody tr:last-child { border-bottom: none; }
+    .history-table tbody tr:hover { background: #fafafa; }
+    .history-table td { padding: .85rem 1.1rem; font-size: .88rem; color: #374151; vertical-align: middle; }
+
+    .td-product { font-weight: 700; color: #0f0f23; }
+    .td-category { color: #6b7280; }
+    .td-file {
+      display: inline-flex; align-items: center; gap: .35rem;
+      background: #f3f4f6; border-radius: .4rem; padding: .2rem .6rem;
+      font-size: .78rem; font-weight: 600; color: #4b5563; max-width: 180px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .td-file i { color: #6366f1; flex-shrink: 0; }
+    .td-date { font-size: .8rem; color: #9ca3af; white-space: nowrap; }
+
+    .btn-view {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      color: #fff; border: none; border-radius: .5rem;
+      padding: .32rem .85rem; font-size: .78rem; font-weight: 600;
+      cursor: pointer; text-decoration: none;
+      display: inline-flex; align-items: center; gap: .3rem;
+      transition: opacity .2s, transform .15s;
+      box-shadow: 0 2px 8px rgba(99,102,241,.3);
+    }
+    .btn-view:hover { opacity: .88; color: #fff; transform: translateY(-1px); }
+
+    .btn-delete {
+      background: transparent; border: 1.5px solid #fecaca;
+      border-radius: .5rem; padding: .3rem .75rem;
+      font-size: .78rem; font-weight: 600; color: #ef4444;
+      cursor: pointer; display: inline-flex; align-items: center; gap: .3rem;
+      transition: all .18s;
+    }
+    .btn-delete:hover { background: #fef2f2; border-color: #ef4444; }
+
+    .actions-cell { display: flex; align-items: center; gap: .5rem; white-space: nowrap; }
+
+    /* ── Empty state ── */
+    .history-empty {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 3rem 1rem; gap: .6rem; color: #d1d5db;
+    }
+    .history-empty i { font-size: 2.5rem; }
+    .history-empty p { font-size: .85rem; color: #9ca3af; margin: 0; text-align: center; }
+
+    /* ── Loading overlay ── */
+    .loading-overlay {
+      position: fixed; inset: 0; background: rgba(255,255,255,.92);
+      backdrop-filter: blur(8px); z-index: 9999;
+      display: none; flex-direction: column; align-items: center; justify-content: center; gap: 1.4rem;
+    }
+    .loading-overlay.show { display: flex; }
+    .loader-ring {
+      width: 60px; height: 60px; border-radius: 50%;
+      border: 4px solid rgba(99,102,241,.15); border-top-color: #6366f1;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loader-text { font-size: .98rem; font-weight: 600; color: #374151; text-align: center; }
+    .loader-sub  { font-size: .82rem; color: #9ca3af; text-align: center; margin-top: -.6rem; }
+    .loader-steps { display: flex; flex-direction: column; gap: .45rem; }
+    .loader-step {
+      display: flex; align-items: center; gap: .55rem;
+      font-size: .81rem; color: #9ca3af; transition: color .4s;
+    }
+    .loader-step.active { color: #6366f1; font-weight: 600; }
+    .loader-step.done   { color: #10b981; }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="glass-nav">
+    <a href="{% url 'iTrendAI:agents' %}" class="nav-brand">
+      <img src="{% static 'image/iTrend Logo.png' %}" alt="iTrend Logo">
+    </a>
+    <span class="nav-title"><i class="bi bi-search-heart"></i> New Product Discovery</span>
+    <a href="#" class="btn-gradient"><i class="bi bi-box-arrow-right"></i> Logout</a>
+  </nav>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loader-ring"></div>
+    <div class="loader-text">Analyzing your data…</div>
+    <div class="loader-sub">This typically takes 30–90 seconds</div>
+    <div class="loader-steps">
+      <div class="loader-step active" id="step1"><i class="bi bi-arrow-right-circle-fill"></i> Parsing Helium 10 report</div>
+      <div class="loader-step"        id="step2"><i class="bi bi-circle"></i> Running market analysis</div>
+      <div class="loader-step"        id="step3"><i class="bi bi-circle"></i> Evaluating competition</div>
+      <div class="loader-step"        id="step4"><i class="bi bi-circle"></i> Generating AI insights</div>
+    </div>
+  </div>
+
+  <div class="page-wrapper">
+    <div class="container" style="max-width: 820px;">
+
+      <!-- Breadcrumb -->
+      <div class="breadcrumb-row">
+        <a href="{% url 'iTrendAI:agents' %}"><i class="bi bi-house"></i> Agents</a>
+        <i class="bi bi-chevron-right"></i>
+        <span>New Product Discovery</span>
+      </div>
+
+      <!-- Form Card -->
+      <div class="form-card">
+        <div class="card-top-bar">
+          <h5><i class="bi bi-search-heart me-2"></i>New Product Discovery</h5>
+          <p>Upload your Helium 10 Xray report and let AI do the heavy lifting</p>
+        </div>
+        <div class="card-body-inner">
+          <form method="post" action="{% url 'iTrendAI:newproductresearchreport' %}" enctype="multipart/form-data" id="researchForm" novalidate>
+            {% csrf_token %}
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="field-label" for="product_name"><i class="bi bi-box-seam"></i> Product Name</label>
+                <input type="text" id="product_name" name="product_name" class="field-input"
+                       placeholder="e.g. Wireless Earbuds, Beach Towel…" autocomplete="off" required>
+                <div class="field-error" id="err_product">Please enter a product name.</div>
+              </div>
+              <div class="col-md-6">
+                <label class="field-label" for="category"><i class="bi bi-tag"></i> Amazon Category</label>
+                <input type="text" id="category" name="category" class="field-input"
+                       placeholder="e.g. Home & Kitchen, Electronics…" autocomplete="off" required>
+                <div class="field-error" id="err_category">Please enter a category.</div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="field-label"><i class="bi bi-file-earmark-spreadsheet"></i> Helium 10 Xray Report</label>
+              <div class="upload-zone" id="dropZone">
+                <input type="file" id="fileInput" name="file" accept=".xlsx,.xls,.csv" required onchange="handleFileSelect(this)">
+                <div class="upload-icon"><i class="bi bi-cloud-arrow-up" id="uploadIconI"></i></div>
+                <div class="upload-main-text" id="uploadMainText">Drop file here or click to browse</div>
+                <div class="upload-sub-text"  id="uploadSubText">Supports .xlsx · .xls · .csv</div>
+                <div class="upload-filename"  id="uploadFilename" style="display:none;"></div>
+              </div>
+              <div class="field-error" id="err_file">Please upload a Helium 10 report file.</div>
+            </div>
+
+            <div class="tip-box mb-4">
+              <i class="bi bi-lightbulb-fill"></i>
+              <p><strong>Pro tip:</strong> Export Helium 10 Xray as <strong>.xlsx</strong> for the most accurate analysis. Include at least 30 products for reliable market insights.</p>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center">
+              <button type="button" class="btn-reset" onclick="resetForm()">
+                <i class="bi bi-arrow-counterclockwise"></i> Reset
+              </button>
+              <button type="submit" class="btn-submit" id="submitBtn">
+                <i class="bi bi-play-circle-fill"></i> Run Analysis
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- History Section -->
+      <div class="section-header">
+        <div class="section-title">
+          <i class="bi bi-clock-history"></i> Research History
+          <span class="history-count">{{ history.count }}</span>
+        </div>
+      </div>
+
+      <div class="history-card">
+        {% if history %}
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Product Name</th>
+              <th>Category</th>
+              <th>Data File</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for report in history %}
+            <tr>
+              <td style="color:#9ca3af; font-size:.8rem; width:40px;">{{ forloop.counter }}</td>
+              <td class="td-product">{{ report.product_name }}</td>
+              <td class="td-category">{{ report.category }}</td>
+              <td>
+                <span class="td-file" title="{{ report.file_name }}">
+                  <i class="bi bi-file-earmark-spreadsheet"></i>
+                  {{ report.file_name }}
+                </span>
+              </td>
+              <td class="td-date">
+                <i class="bi bi-calendar3 me-1"></i>
+                {{ report.created_at|date:"d M Y" }}<br>
+                <span style="font-size:.73rem;">{{ report.created_at|date:"H:i" }}</span>
+              </td>
+              <td>
+                <div class="actions-cell">
+                  <a href="{% url 'iTrendAI:view_report' report.pk %}" class="btn-view">
+                    <i class="bi bi-eye"></i> View
+                  </a>
+                  <form method="post" action="{% url 'iTrendAI:delete_report' report.pk %}" style="margin:0;"
+                        onsubmit="return confirm('Delete this report? This cannot be undone.');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-delete">
+                      <i class="bi bi-trash3"></i> Delete
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="history-empty">
+          <i class="bi bi-inbox"></i>
+          <p>No reports yet.<br>Run your first analysis above to see it here.</p>
+        </div>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+  <script>
+    function handleFileSelect(input) {
+      const zone = document.getElementById('dropZone');
+      const icon = document.getElementById('uploadIconI');
+      const main = document.getElementById('uploadMainText');
+      const sub  = document.getElementById('uploadSubText');
+      const name = document.getElementById('uploadFilename');
+      if (input.files.length) {
+        zone.classList.add('has-file');
+        icon.className = 'bi bi-check-circle-fill';
+        main.textContent = 'File selected';
+        sub.style.display = 'none';
+        name.textContent   = input.files[0].name;
+        name.style.display = 'block';
+        document.getElementById('err_file').classList.remove('show');
+      }
+    }
+
+    const zone = document.getElementById('dropZone');
+    zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('dragover'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+    zone.addEventListener('drop',      () => zone.classList.remove('dragover'));
+
+    function resetForm() {
+      document.getElementById('researchForm').reset();
+      const zone = document.getElementById('dropZone');
+      zone.classList.remove('has-file');
+      document.getElementById('uploadIconI').className  = 'bi bi-cloud-arrow-up';
+      document.getElementById('uploadMainText').textContent = 'Drop file here or click to browse';
+      document.getElementById('uploadSubText').style.display = '';
+      document.getElementById('uploadFilename').style.display = 'none';
+      document.querySelectorAll('.field-input').forEach(el => el.classList.remove('is-invalid'));
+      document.querySelectorAll('.field-error').forEach(el => el.classList.remove('show'));
+    }
+
+    document.getElementById('researchForm').addEventListener('submit', function(e) {
+      let valid = true;
+
+      [['product_name','err_product'], ['category','err_category']].forEach(([id, errId]) => {
+        const el = document.getElementById(id);
+        if (!el.value.trim()) {
+          el.classList.add('is-invalid');
+          document.getElementById(errId).classList.add('show');
+          valid = false;
+        } else {
+          el.classList.remove('is-invalid');
+          document.getElementById(errId).classList.remove('show');
+        }
+      });
+
+      if (!document.getElementById('fileInput').files.length) {
+        document.getElementById('err_file').classList.add('show');
+        valid = false;
+      } else {
+        document.getElementById('err_file').classList.remove('show');
+      }
+
+      if (!valid) { e.preventDefault(); return; }
+
+      document.getElementById('loadingOverlay').classList.add('show');
+      document.getElementById('submitBtn').disabled = true;
+
+      const steps  = ['step1','step2','step3','step4'];
+      const delays = [0, 8000, 22000, 45000];
+      steps.forEach((id, i) => {
+        if (i === 0) return;
+        setTimeout(() => {
+          const prev = document.getElementById(steps[i - 1]);
+          prev.classList.replace('active','done');
+          prev.querySelector('i').className = 'bi bi-check-circle-fill';
+          const cur = document.getElementById(id);
+          cur.classList.add('active');
+          cur.querySelector('i').className = 'bi bi-arrow-right-circle-fill';
+        }, delays[i]);
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,465 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Research Report — iTrendAI</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0; background: #ffffff; min-height: 100vh;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #1a1a2e;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 10% -10%, rgba(99,102,241,.07) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 95% 110%, rgba(139,92,246,.06) 0%, transparent 60%);
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ── Navbar ── */
+    .glass-nav {
+      position: fixed; top: 18px; left: 50%; transform: translateX(-50%);
+      width: calc(100% - 48px); max-width: 1300px; z-index: 1000;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .7rem 1.4rem;
+      background: rgba(255,255,255,.65);
+      backdrop-filter: blur(18px) saturate(180%); -webkit-backdrop-filter: blur(18px) saturate(180%);
+      border: 1px solid rgba(255,255,255,.75); border-radius: 1rem;
+      box-shadow: 0 4px 24px rgba(99,102,241,.10), 0 1.5px 4px rgba(0,0,0,.06), inset 0 1px 0 rgba(255,255,255,.8);
+    }
+    .nav-brand { display: inline-flex; align-items: center; text-decoration: none; line-height: 0; }
+    .nav-brand img { height: 38px; width: auto; object-fit: contain; }
+    .nav-center { font-size: .85rem; font-weight: 600; color: #6b7280; display: flex; align-items: center; gap: .4rem; }
+    .nav-center i { color: #6366f1; }
+    .btn-gradient {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      color: #fff; border: none; border-radius: .6rem; padding: .45rem 1.1rem;
+      font-size: .85rem; font-weight: 600; cursor: pointer;
+      box-shadow: 0 2px 12px rgba(99,102,241,.35);
+      text-decoration: none; display: inline-flex; align-items: center; gap: .35rem;
+      transition: opacity .2s, transform .15s;
+    }
+    .btn-gradient:hover { opacity: .9; color: #fff; transform: translateY(-1px); }
+
+    /* ── Layout ── */
+    .page-wrapper { position: relative; z-index: 1; padding-top: 100px; padding-bottom: 60px; }
+    .layout { display: flex; gap: 1.4rem; max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; align-items: flex-start; }
+
+    /* ━━━ SIDEBAR ━━━ */
+    .sidebar {
+      width: 268px; flex-shrink: 0;
+      position: sticky; top: 96px;
+      max-height: calc(100vh - 112px);
+      display: flex; flex-direction: column;
+      background: #fff; border-radius: 1.1rem;
+      border: 1px solid rgba(0,0,0,.07);
+      box-shadow: 0 2px 16px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.04);
+      overflow: hidden;
+    }
+    .sidebar-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .95rem 1rem .8rem; border-bottom: 1px solid #f3f4f6; flex-shrink: 0;
+    }
+    .sidebar-title { font-size: .82rem; font-weight: 700; color: #0f0f23; display: flex; align-items: center; gap: .4rem; }
+    .sidebar-title i { color: #6366f1; }
+    .sidebar-count {
+      background: rgba(99,102,241,.1); color: #6366f1;
+      border-radius: 2rem; padding: .15rem .55rem; font-size: .72rem; font-weight: 700;
+    }
+    .sidebar-list {
+      flex: 1; overflow-y: auto; padding: .5rem .5rem;
+      scrollbar-width: thin; scrollbar-color: #e5e7eb transparent;
+    }
+    .sidebar-list::-webkit-scrollbar { width: 4px; }
+    .sidebar-list::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 4px; }
+
+    .history-empty-sb {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 1.8rem .8rem; gap: .5rem; text-align: center;
+    }
+    .history-empty-sb i { font-size: 1.8rem; color: #d1d5db; }
+    .history-empty-sb p { font-size: .76rem; color: #9ca3af; margin: 0; line-height: 1.5; }
+
+    .history-item {
+      width: 100%; text-align: left; background: transparent;
+      border: 1px solid transparent; border-radius: .7rem;
+      padding: .65rem .8rem; cursor: pointer; margin-bottom: .3rem;
+      transition: background .15s, border-color .15s; display: block; text-decoration: none;
+    }
+    .history-item:hover { background: #f9fafb; border-color: #e5e7eb; }
+    .history-item.active { background: rgba(99,102,241,.07); border-color: rgba(99,102,241,.2); }
+
+    .hi-name { font-size: .81rem; font-weight: 700; color: #0f0f23; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: .1rem; }
+    .history-item.active .hi-name { color: #6366f1; }
+    .hi-cat  { font-size: .73rem; color: #6b7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: .28rem; }
+    .hi-meta { display: flex; align-items: center; justify-content: space-between; gap: .3rem; }
+    .hi-date { font-size: .69rem; color: #9ca3af; }
+    .hi-file { font-size: .68rem; color: #a78bfa; font-weight: 600; max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* ── Mobile sidebar ── */
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 499; }
+    .sidebar-toggle {
+      display: none; position: fixed; bottom: 24px; right: 24px; z-index: 500;
+      width: 48px; height: 48px; border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff; border: none; font-size: 1.1rem; cursor: pointer;
+      box-shadow: 0 4px 16px rgba(99,102,241,.4);
+      align-items: center; justify-content: center;
+    }
+    @media (max-width: 900px) {
+      .layout { padding: 0 1rem; }
+      .sidebar {
+        position: fixed; top: 0; left: 0; bottom: 0; width: 280px;
+        max-height: 100vh; border-radius: 0; z-index: 600;
+        transform: translateX(-100%); transition: transform .3s cubic-bezier(.4,0,.2,1);
+        box-shadow: 4px 0 24px rgba(0,0,0,.12);
+      }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-overlay.open { display: block; }
+      .sidebar-toggle { display: flex; }
+    }
+
+    /* ━━━ MAIN ━━━ */
+    .main-content { flex: 1; min-width: 0; }
+
+    .breadcrumb-row {
+      display: flex; align-items: center; gap: .5rem;
+      font-size: .8rem; color: #9ca3af; margin-bottom: 1rem;
+    }
+    .breadcrumb-row a { color: #6366f1; text-decoration: none; font-weight: 500; }
+    .breadcrumb-row a:hover { text-decoration: underline; }
+    .breadcrumb-row .bi-chevron-right { font-size: .65rem; }
+
+    /* ── File banner ── */
+    .file-banner {
+      display: flex; align-items: center; gap: .7rem;
+      background: #f9fafb; border: 1px solid #e5e7eb;
+      border-radius: .75rem; padding: .65rem 1.05rem; margin-bottom: .9rem;
+    }
+    .file-banner-icon {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, rgba(99,102,241,.12), rgba(139,92,246,.12));
+      border-radius: .45rem; display: flex; align-items: center; justify-content: center;
+      font-size: .9rem; color: #6366f1; flex-shrink: 0;
+    }
+    .file-banner-label { font-size: .7rem; color: #9ca3af; font-weight: 500; line-height: 1; margin-bottom: .15rem; }
+    .file-banner-name  { font-size: .88rem; font-weight: 700; color: #0f0f23; }
+
+    /* ── Meta bar ── */
+    .meta-bar {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      border-radius: 1rem; padding: .95rem 1.3rem;
+      display: flex; flex-wrap: wrap; align-items: center; gap: .8rem;
+      margin-bottom: 1.1rem; box-shadow: 0 4px 20px rgba(99,102,241,.28);
+    }
+    .meta-icon { width: 36px; height: 36px; background: rgba(255,255,255,.15); border-radius: .55rem; display: flex; align-items: center; justify-content: center; font-size: .95rem; color: #fff; flex-shrink: 0; }
+    .meta-field { display: flex; flex-direction: column; }
+    .meta-label { font-size: .68rem; color: rgba(255,255,255,.6); font-weight: 500; text-transform: uppercase; letter-spacing: .5px; }
+    .meta-value { font-size: .9rem; color: #fff; font-weight: 700; }
+    .meta-sep { width: 1px; height: 26px; background: rgba(255,255,255,.2); }
+    .meta-actions { margin-left: auto; }
+    .btn-light-ghost {
+      background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.28);
+      border-radius: .55rem; padding: .35rem .85rem; font-size: .79rem; font-weight: 600; color: #fff;
+      text-decoration: none; display: inline-flex; align-items: center; gap: .3rem; transition: background .18s;
+    }
+    .btn-light-ghost:hover { background: rgba(255,255,255,.25); color: #fff; }
+
+    /* ── Report card ── */
+    .report-card { background: #fff; border-radius: 1.1rem; border: 1px solid rgba(0,0,0,.07); box-shadow: 0 4px 28px rgba(0,0,0,.07); overflow: hidden; }
+    .report-card-header { display: flex; align-items: center; justify-content: space-between; padding: .85rem 1.3rem; border-bottom: 1px solid #f3f4f6; }
+    .report-header-left { display: flex; align-items: center; gap: .5rem; font-size: .9rem; font-weight: 700; color: #0f0f23; }
+    .report-header-left i { color: #6366f1; }
+    .status-badge { display: inline-flex; align-items: center; gap: .32rem; font-size: .75rem; font-weight: 700; border-radius: 2rem; padding: .26rem .78rem; }
+    .status-badge.generating { background: rgba(245,158,11,.12); color: #d97706; }
+    .status-badge.success    { background: rgba(16,185,129,.12);  color: #059669; }
+    .status-badge.error      { background: rgba(239,68,68,.12);   color: #dc2626; }
+    .btn-copy {
+      background: transparent; border: 1.5px solid #e5e7eb; border-radius: .5rem;
+      padding: .28rem .75rem; font-size: .77rem; font-weight: 600; color: #6b7280;
+      cursor: pointer; display: none; align-items: center; gap: .3rem; transition: all .18s;
+    }
+    .btn-copy:hover { border-color: #6366f1; color: #6366f1; background: rgba(99,102,241,.05); }
+    .btn-copy.visible { display: inline-flex; }
+
+    /* Skeleton */
+    .skeleton-wrap { padding: 1.6rem 1.4rem; }
+    .skeleton-line {
+      height: 12px; border-radius: 4px;
+      background: linear-gradient(90deg, #f3f4f6 25%, #e9ecef 50%, #f3f4f6 75%);
+      background-size: 200% 100%; animation: shimmer 1.5s infinite; margin-bottom: 10px;
+    }
+    .skeleton-line.thick { height: 16px; margin-bottom: 13px; }
+    @keyframes shimmer { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+
+    /* Report body */
+    .ai-report { padding: 1.5rem 1.8rem; display: none; min-height: 180px; }
+    .ai-report h1,.ai-report h2,.ai-report h3,.ai-report h4,.ai-report h5,.ai-report h6 { margin-top:1.5rem; margin-bottom:.5rem; font-weight:800; color:#0f0f23; line-height:1.3; }
+    .ai-report h1 { font-size:1.38rem; padding-bottom:.45rem; border-bottom:2px solid #f3f4f6; margin-top:0; }
+    .ai-report h2 { font-size:1.16rem; padding-bottom:.28rem; border-bottom:1px solid #f3f4f6; }
+    .ai-report h3 { font-size:1.02rem; color:#6366f1; }
+    .ai-report h4 { font-size:.94rem; color:#374151; }
+    .ai-report p  { font-size:.915rem; line-height:1.8; color:#374151; margin-bottom:.8rem; }
+    .ai-report ul,.ai-report ol { padding-left:1.4rem; margin-bottom:.85rem; }
+    .ai-report li { font-size:.915rem; line-height:1.75; color:#374151; margin-bottom:.26rem; }
+    .ai-report strong { color:#0f0f23; font-weight:700; }
+    .ai-report em { color:#6b7280; }
+    .ai-report code { background:#f1f5f9; border-radius:.3rem; padding:.1rem .4rem; font-size:.87em; color:#7c3aed; font-family:'Cascadia Code','Fira Code',monospace; }
+    .ai-report pre { background:#1e1e2e; border-radius:.75rem; padding:1.1rem 1.4rem; overflow-x:auto; margin-bottom:1rem; }
+    .ai-report pre code { background:none; padding:0; color:#cdd6f4; font-size:.875rem; }
+    .ai-report blockquote { border-left:3px solid #6366f1; background:rgba(99,102,241,.05); margin:1rem 0; padding:.75rem 1rem; border-radius:0 .5rem .5rem 0; color:#4b5563; }
+    .ai-report table { width:100%; border-collapse:collapse; margin-bottom:1.1rem; font-size:.87rem; border:1px solid #e5e7eb; }
+    .ai-report th,.ai-report td { border:1px solid #e5e7eb; padding:.48rem .75rem; text-align:left; }
+    .ai-report th { background:#f8f9fa; font-weight:700; color:#0f0f23; font-size:.79rem; text-transform:uppercase; letter-spacing:.3px; }
+    .ai-report tr:nth-child(even) td { background:#fafafa; }
+    .ai-report hr { border:none; border-top:1px solid #f3f4f6; margin:1.3rem 0; }
+    .ai-report a { color:#6366f1; }
+
+    #streamCursor { display:inline-block; width:2px; height:1em; background:#6366f1; margin-left:2px; vertical-align:text-bottom; animation:blink .7s step-start infinite; }
+    #streamCursor.hidden { display:none; }
+    @keyframes blink { 0%,100%{opacity:1;}50%{opacity:0;} }
+
+    .error-box { margin:1.4rem; background:rgba(239,68,68,.05); border:1px solid rgba(239,68,68,.2); border-radius:.75rem; padding:1rem 1.2rem; gap:.65rem; align-items:flex-start; display:none; }
+    .error-box.show { display:flex; }
+    .error-box i { color:#dc2626; font-size:1rem; flex-shrink:0; }
+    .error-box p { font-size:.86rem; color:#7f1d1d; margin:0; line-height:1.6; }
+
+    .report-footer { padding:.8rem 1.3rem; border-top:1px solid #f3f4f6; display:none; align-items:center; flex-wrap:wrap; gap:.45rem; }
+    .stat-chip { display:inline-flex; align-items:center; gap:.3rem; background:#f9fafb; border:1px solid #e5e7eb; border-radius:2rem; padding:.2rem .65rem; font-size:.72rem; font-weight:600; color:#6b7280; }
+    .stat-chip i { font-size:.76rem; color:#6366f1; }
+  </style>
+</head>
+<body>
+
+  <!-- Hidden data from Django -->
+  <script id="aiOutputData" type="application/json">"{{ ai_output|escapejs }}"</script>
+
+  <!-- Navbar -->
+  <nav class="glass-nav">
+    <a href="{% url 'iTrendAI:agents' %}" class="nav-brand">
+      <img src="{% static 'image/iTrend Logo.png' %}" alt="iTrend Logo">
+    </a>
+    <span class="nav-center"><i class="bi bi-bar-chart-line"></i> Research Report</span>
+    <a href="#" class="btn-gradient"><i class="bi bi-box-arrow-right"></i> Logout</a>
+  </nav>
+
+  <!-- Mobile overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+  <div class="page-wrapper">
+    <div class="layout">
+
+      <!-- ━━━ SIDEBAR ━━━ -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <span class="sidebar-title">
+            <i class="bi bi-clock-history"></i> Report History
+            <span class="sidebar-count">{{ history.count }}</span>
+          </span>
+        </div>
+        <div class="sidebar-list">
+          {% if history %}
+            {% for report in history %}
+            <a href="{% url 'iTrendAI:view_report' report.pk %}"
+               class="history-item {% if report.pk == current_id %}active{% endif %}">
+              <div class="hi-name">{{ report.product_name }}</div>
+              <div class="hi-cat">{{ report.category }}</div>
+              <div class="hi-meta">
+                <span class="hi-date">{{ report.created_at|date:"d M Y · H:i" }}</span>
+                <span class="hi-file" title="{{ report.file_name }}">{{ report.file_name }}</span>
+              </div>
+            </a>
+            {% endfor %}
+          {% else %}
+            <div class="history-empty-sb">
+              <i class="bi bi-inbox"></i>
+              <p>No reports saved yet.</p>
+            </div>
+          {% endif %}
+        </div>
+      </aside>
+
+      <!-- ━━━ MAIN ━━━ -->
+      <main class="main-content">
+
+        <!-- Breadcrumb -->
+        <div class="breadcrumb-row">
+          <a href="{% url 'iTrendAI:agents' %}"><i class="bi bi-house"></i> Agents</a>
+          <i class="bi bi-chevron-right"></i>
+          <a href="{% url 'iTrendAI:newproductresearch' %}">New Product Discovery</a>
+          <i class="bi bi-chevron-right"></i>
+          <span>Report</span>
+        </div>
+
+        <!-- File banner -->
+        <div class="file-banner">
+          <div class="file-banner-icon"><i class="bi bi-file-earmark-spreadsheet"></i></div>
+          <div>
+            <div class="file-banner-label">Loaded Data File</div>
+            <div class="file-banner-name">{{ file_name|default:"—" }}</div>
+          </div>
+        </div>
+
+        <!-- Meta bar -->
+        <div class="meta-bar">
+          <div class="meta-icon"><i class="bi bi-search-heart"></i></div>
+          <div class="meta-field">
+            <span class="meta-label">Product</span>
+            <span class="meta-value">{{ product_name|default:"—" }}</span>
+          </div>
+          <div class="meta-sep"></div>
+          <div class="meta-field">
+            <span class="meta-label">Category</span>
+            <span class="meta-value">{{ category|default:"—" }}</span>
+          </div>
+          <div class="meta-actions">
+            <a href="{% url 'iTrendAI:newproductresearch' %}" class="btn-light-ghost">
+              <i class="bi bi-plus-circle"></i> New Research
+            </a>
+          </div>
+        </div>
+
+        <!-- Report card -->
+        <div class="report-card">
+          <div class="report-card-header">
+            <div class="report-header-left"><i class="bi bi-robot"></i> AI Analysis Report</div>
+            <div class="d-flex align-items-center gap-2">
+              <span id="statusBadge" class="status-badge generating">
+                <i class="bi bi-hourglass-split"></i> Generating…
+              </span>
+              <button id="copyBtn" class="btn-copy" onclick="copyReport()">
+                <i class="bi bi-clipboard"></i> Copy
+              </button>
+            </div>
+          </div>
+
+          <div class="error-box" id="errorBox">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <p><strong>Analysis Error</strong><br><span id="errorMsg"></span></p>
+          </div>
+
+          <div class="skeleton-wrap" id="skeleton">
+            <div class="skeleton-line thick" style="width:52%"></div>
+            <div class="skeleton-line" style="width:87%"></div>
+            <div class="skeleton-line" style="width:73%"></div>
+            <div class="skeleton-line" style="width:91%"></div>
+            <div class="skeleton-line" style="width:64%"></div>
+            <div class="skeleton-line thick" style="width:41%; margin-top:1.1rem;"></div>
+            <div class="skeleton-line" style="width:80%"></div>
+            <div class="skeleton-line" style="width:68%"></div>
+            <div class="skeleton-line" style="width:77%"></div>
+          </div>
+
+          <div class="ai-report" id="aiReport">
+            <span id="streamCursor"></span>
+          </div>
+
+          <div class="report-footer" id="reportFooter">
+            <span class="stat-chip"><i class="bi bi-robot"></i> Powered by AI</span>
+            <span class="stat-chip" id="wordCountChip"><i class="bi bi-file-text"></i> —</span>
+            <span class="stat-chip"><i class="bi bi-shield-check"></i> Helium 10 Data</span>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Mobile toggle -->
+  <button class="sidebar-toggle" id="sidebarToggle" onclick="openSidebar()" title="Report History">
+    <i class="bi bi-clock-history"></i>
+  </button>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+  <script>
+    marked.setOptions({ breaks: false, gfm: true });
+
+    const rawText  = JSON.parse(document.getElementById('aiOutputData').textContent);
+    const reportEl = document.getElementById('aiReport');
+    const cursor   = document.getElementById('streamCursor');
+    const skeleton = document.getElementById('skeleton');
+    const statusEl = document.getElementById('statusBadge');
+    const copyBtn  = document.getElementById('copyBtn');
+    const errorBox = document.getElementById('errorBox');
+    const errorMsg = document.getElementById('errorMsg');
+    const footer   = document.getElementById('reportFooter');
+    const wordChip = document.getElementById('wordCountChip');
+
+    const isError   = rawText.startsWith('ERROR:');
+    const SPEED_MS  = 6;
+    let accumulated = '';
+
+    function renderMarkdown(text) {
+      reportEl.innerHTML = marked.parse(text);
+      reportEl.appendChild(cursor);
+    }
+
+    function finishStream() {
+      cursor.classList.add('hidden');
+      footer.style.display = 'flex';
+      const words = accumulated.trim().split(/\s+/).length;
+      wordChip.innerHTML = `<i class="bi bi-file-text"></i> ${words.toLocaleString()} words`;
+
+      if (isError) {
+        statusEl.className = 'status-badge error';
+        statusEl.innerHTML = '<i class="bi bi-x-circle"></i> Error';
+        reportEl.style.display = 'none';
+        errorBox.classList.add('show');
+        errorMsg.textContent = accumulated.replace(/^ERROR:\s*/i, '');
+      } else {
+        statusEl.className = 'status-badge success';
+        statusEl.innerHTML = '<i class="bi bi-check-circle"></i> Complete';
+        copyBtn.classList.add('visible');
+      }
+    }
+
+    function streamText(text) {
+      skeleton.style.display = 'none';
+      reportEl.style.display = 'block';
+      let i = 0;
+      const total = text.length;
+      let renderPending = false;
+
+      function tick() {
+        const chunk = Math.min(8, total - i);
+        accumulated += text.slice(i, i + chunk);
+        i += chunk;
+
+        if (!renderPending) {
+          renderPending = true;
+          requestAnimationFrame(() => {
+            renderMarkdown(accumulated);
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            renderPending = false;
+          });
+        }
+
+        if (i < total) {
+          setTimeout(tick, SPEED_MS);
+        } else {
+          requestAnimationFrame(() => { renderMarkdown(accumulated); finishStream(); });
+        }
+      }
+      setTimeout(tick, 400);
+    }
+
+    function copyReport() {
+      navigator.clipboard.writeText(rawText).then(() => {
+        copyBtn.innerHTML = '<i class="bi bi-clipboard-check"></i> Copied!';
+        setTimeout(() => { copyBtn.innerHTML = '<i class="bi bi-clipboard"></i> Copy'; }, 2000);
+      });
+    }
+
+    function openSidebar()  { document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebarOverlay').classList.add('open'); }
+    function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('open'); }
+
+    streamText(rawText);
+  </script>
+</body>
+</html>
